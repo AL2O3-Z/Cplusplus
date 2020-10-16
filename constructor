@@ -1,0 +1,25 @@
+参数 vector<int> nums 是以copy形式传入构造函数的，nums_(std::move(nums)) 移动构造，省去了一次copy。
+
+如果是 vector<int> & nums的话就不能用move了
+因为没有ownership，只能copy一份。因为owner在调用构造函数之后随时可以销毁vector<int>& nums...
+
+参数传递有以下几种选择：
+
+No modification needed:
+vector<int> nums // copy, move if needed
+const vector<int>& nums // const reference, no ownership
+
+Need modification:
+unique_ptr<vector<int>> nums // unique_ptr, ownership
+vector<int>* nums // raw pointer, no ownership
+
+Do not use non-const reference in any case, leetcode uses a lot which is bad...
+vector<int>& nums // non-const reference
+const& 类型调用时传参直接用变量名，* 类型调用时需要取地址，这样写完之后，一看就知道哪些参数是会被修改的，哪些参数是不会被修改的，形式上很接近 C 语言，比较统一。
+如果可以修改的参数直接用 & 类型而不是使用 const& 类型，那么调用者就不得不查看头文件源代码或者查看说明文档才能知道哪些参数会被修改。
+在 Google C++ Style Guide 的 Reference Arguments 中写到
+
+In fact it is a very strong convention in Google code that input arguments are values or const references while output arguments are pointers. 
+Input parameters may be const pointers, but we never allow non-constreference parameters except when required by convention, e.g.,swap().
+在 cons 中写到
+References can be confusing, as they have value syntax but pointer semantics.
